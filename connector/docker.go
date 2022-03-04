@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"regexp"
 
 	"github.com/op/go-logging"
 
@@ -169,6 +170,8 @@ func ipsFormat(networks map[string]api.ContainerNetwork) string {
 	return strings.Join(ips, "\n")
 }
 
+var envPattern = regexp.MustCompile(`(?P<KEY>[^=]+)=(?P<VALUJE>.*)`)
+
 func (cm *Docker) refresh(c *container.Container) {
 	insp, found, failed := cm.inspect(c.Id)
 	if failed {
@@ -192,6 +195,19 @@ func (cm *Docker) refresh(c *container.Container) {
 	c.SetMeta("health", insp.State.Health.Status)
 	c.SetMeta("[ENV-VAR]", strings.Join(insp.Config.Env, ";"))
 	c.SetState(insp.State.Status)
+
+	// user
+	created_user := "undefined"
+	for _, env := range insp.Config.Env {
+		match := envPattern.FindStringSubmatch(env)
+		key := match[1]
+		value := match[2]
+		if key == "CONTAINER_CREATED_USER" {
+			created_user = value
+			break
+		}
+	}
+	c.SetMeta("user", shortName(created_user))
 }
 
 func (cm *Docker) inspect(id string) (insp *api.Container, found bool, failed bool) {

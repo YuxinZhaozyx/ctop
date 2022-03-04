@@ -115,4 +115,23 @@ Option | Description
 
 ## Alternatives
 
-See [Awesome Docker list](https://github.com/veggiemonk/awesome-docker/blob/master/README.md#terminal) for similar tools to work with Docker. 
+See [Awesome Docker list](https://github.com/veggiemonk/awesome-docker/blob/master/README.md#terminal) for similar tools to work with Docker.
+
+
+# Build and Install (with "container created user" support)
+
+## Linux (Generic)
+
+```shell
+git clone https://github.com/YuxinZhaozyx/ctop.git ctop-src
+cd ctop-src
+docker run --rm -v $(pwd):/app quay.io/vektorcloud/go:1.15 sh -c "apk add --no-cache make && make build"
+
+cp ./ctop /usr/local/bin/ctop
+cp ./script/docker_wrapper.sh /usr/local/bin/docker_wrapper.sh
+chmod a+x /usr/local/bin/ctop
+chmod a+x /usr/local/bin/docker_wrapper.sh
+echo alias=\"docker_wrapper.sh\" >> /etc/bash.bashrc
+```
+
+Restart terminal. Now the `ctop` will display the user creating the container at additional column `USER`. You can also use `docker ctop` to trigger ctop menu.

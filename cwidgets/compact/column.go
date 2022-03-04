@@ -10,6 +10,7 @@ import (
 var (
 	allCols = map[string]NewCompactColFn{
 		"status":  NewStatus,
+		"user":    NewUserCol,
 		"name":    NewNameCol,
 		"id":      NewCIDCol,
 		"image":   NewImageCol,

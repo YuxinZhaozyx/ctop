@@ -49,6 +49,12 @@ func NewCreatedCol() CompactCol {
 	return c
 }
 
+func NewUserCol() CompactCol {
+	c := &MetaCol{NewTextCol("USER"), "user"}
+	c.fWidth = 12
+	return c
+}
+
 type NetCol struct {
 	*TextCol
 }

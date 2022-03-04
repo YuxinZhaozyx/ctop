@@ -12,6 +12,11 @@ var defaultColumns = []Column{
 		Enabled: true,
 	},
 	{
+		Name:    "user",
+		Label:   "User",
+		Enabled: true,
+	},
+	{
 		Name:    "name",
 		Label:   "Container Name",
 		Enabled: true,
