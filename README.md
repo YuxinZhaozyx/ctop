@@ -131,7 +131,7 @@ cp ./ctop /usr/local/bin/ctop
 cp ./script/docker_wrapper.sh /usr/local/bin/docker_wrapper.sh
 chmod a+x /usr/local/bin/ctop
 chmod a+x /usr/local/bin/docker_wrapper.sh
-echo alias docker=\"docker_wrapper.sh\" >> /etc/bash.bashrc
+echo "alias docker=\"docker_wrapper.sh\"" >> /etc/bash.bashrc
 ```
 
 Restart terminal. Now the `ctop` will display the user creating the container at additional column `USER`. You can also use `docker ctop` to trigger ctop menu.
