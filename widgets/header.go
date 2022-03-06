@@ -78,7 +78,7 @@ func (c *CTopHeader) SetFilter(val string) {
 
 func (c *CTopHeader) SetProcessMonitorHint(val bool) {
 	if val {
-		c.Hint.Text = "press <tab> to process-monitor"
+		c.Hint.Text = "press <TAB> to process-monitor"
 	} else {
 		c.Hint.Text = ""
 	}
