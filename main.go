@@ -11,6 +11,7 @@ import (
 	"github.com/bcicen/ctop/connector"
 	"github.com/bcicen/ctop/container"
 	"github.com/bcicen/ctop/cwidgets/compact"
+	"github.com/bcicen/ctop/cwidgets/process"
 	"github.com/bcicen/ctop/logging"
 	"github.com/bcicen/ctop/widgets"
 	ui "github.com/gizak/termui"
@@ -25,6 +26,8 @@ var (
 	log     *logging.CTopLogger
 	cursor  *GridCursor
 	cGrid   *compact.CompactGrid
+	pGrid   *process.ProcessGrid
+	pManager *process.ProcessManager
 	header  *widgets.CTopHeader
 	status  *widgets.StatusLine
 	errView *widgets.ErrorView
@@ -67,6 +70,8 @@ func main() {
 		log.Warningf("reading config: %s", err)
 	}
 
+	process.Init()
+
 	// override default config values with command line flags
 	if *filterFlag != "" {
 		config.Update("filterStr", *filterFlag)
@@ -106,6 +111,9 @@ func main() {
 	header = widgets.NewCTopHeader()
 	status = widgets.NewStatusLine()
 	errView = widgets.NewErrorView()
+	pGrid = process.NewProcessGrid()
+	pManager, err = process.NewProcessManager()
+
 
 	for {
 		exit := Display()

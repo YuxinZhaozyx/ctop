@@ -11,16 +11,20 @@ type CTopHeader struct {
 	Time   *ui.Par
 	Count  *ui.Par
 	Filter *ui.Par
+	Hint   *ui.Par
 	bg     *ui.Par
 }
 
 func NewCTopHeader() *CTopHeader {
-	return &CTopHeader{
+	header := &CTopHeader{
 		Time:   headerPar(2, ""),
 		Count:  headerPar(24, "-"),
 		Filter: headerPar(40, ""),
+		Hint:   headerPar(0, ""),
 		bg:     headerBg(),
 	}
+	header.Hint.Width = 30
+	return header
 }
 
 func (c *CTopHeader) Buffer() ui.Buffer {
@@ -30,11 +34,13 @@ func (c *CTopHeader) Buffer() ui.Buffer {
 	buf.Merge(c.Time.Buffer())
 	buf.Merge(c.Count.Buffer())
 	buf.Merge(c.Filter.Buffer())
+	buf.Merge(c.Hint.Buffer())
 	return buf
 }
 
 func (c *CTopHeader) Align() {
 	c.bg.SetWidth(ui.TermWidth() - 1)
+	c.Hint.X = ui.TermWidth() - 30
 }
 
 func (c *CTopHeader) Height() int {
@@ -67,6 +73,14 @@ func (c *CTopHeader) SetFilter(val string) {
 		c.Filter.Text = ""
 	} else {
 		c.Filter.Text = fmt.Sprintf("filter: %s", val)
+	}
+}
+
+func (c *CTopHeader) SetProcessMonitorHint(val bool) {
+	if val {
+		c.Hint.Text = "press <tab> to process-monitor"
+	} else {
+		c.Hint.Text = ""
 	}
 }
 

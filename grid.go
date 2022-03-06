@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/bcicen/ctop/config"
 	"github.com/bcicen/ctop/cwidgets/single"
+	"github.com/bcicen/ctop/cwidgets/process"
 	ui "github.com/gizak/termui"
 )
 
@@ -105,6 +106,77 @@ func SingleView() MenuFn {
 	return nil
 }
 
+func RedrawProcessView(clr bool) {
+	pGrid.Clear()
+
+	y := 1
+	if config.GetSwitchVal("enableHeader") {
+		header.SetCount(cursor.Len())
+		header.SetFilter(config.GetVal("filterStr"))
+		y += header.Height()
+	}
+
+	pGrid.SetY(y)
+
+	processMetas := pManager.GetProcessMetas()
+
+	for _, processMeta := range processMetas {
+		processRow := process.NewProcessRow()
+		processRow.SetMeta(processMeta)
+		pGrid.AddRows(processRow)
+	}
+
+	if clr {
+		ui.Clear()
+	}
+	if config.GetSwitchVal("enableHeader") {
+		ui.Render(header)
+	}
+
+	pGrid.Align()
+	ui.Render(pGrid)
+
+}
+
+func ProcessView() MenuFn {
+	ui.Clear()
+	ui.DefaultEvtStream.ResetHandlers()
+	defer ui.DefaultEvtStream.ResetHandlers()
+
+	pGrid.SetWidth(ui.TermWidth())
+	pGrid.Align()
+	ui.Render(pGrid)
+
+
+	RedrawProcessView(true)
+
+	HandleKeys("exit", ui.StopLoop)
+
+	ui.Handle("/sys/kbd/<tab>", func(ui.Event) {
+		ui.StopLoop()
+	})
+
+	ui.Handle("/timer/1s", func(e ui.Event) {
+		if log.StatusQueued() {
+			ui.StopLoop()
+		}
+		RedrawProcessView(true)
+	})
+
+	ui.Handle("/sys/wnd/resize", func(e ui.Event) {
+		header.Align()
+		status.Align()
+		pGrid.SetWidth(ui.TermWidth())
+		RedrawProcessView(true)
+	})
+
+	ui.Loop()
+
+	header.SetProcessMonitorHint(true)
+
+	return nil
+}
+
 func RefreshDisplay() error {
 	// skip display refresh during scroll
 	if !cursor.isScrolling {
@@ -124,6 +196,7 @@ func Display() bool {
 	cGrid.SetWidth(ui.TermWidth())
 	ui.DefaultEvtStream.Hook(logEvent)
 
+	header.SetProcessMonitorHint(true)
 	// initial draw
 	header.Align()
 	status.Align()
@@ -153,6 +226,11 @@ func Display() bool {
 	ui.Handle("/sys/kbd/<right>", func(ui.Event) {
 		menu = SingleView
 		ui.StopLoop()
+	})
+	ui.Handle("/sys/kbd/<tab>", func(ui.Event) {
+		menu = ProcessView
+		ui.StopLoop()
+		header.SetProcessMonitorHint(false)
 	})
 	ui.Handle("/sys/kbd/l", func(ui.Event) {
 		menu = LogMenu
