@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "time"
+	"time"
 
 	"github.com/bcicen/ctop/config"
 	"github.com/bcicen/ctop/cwidgets/single"

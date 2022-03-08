@@ -142,7 +142,7 @@ func (pm *ProcessManager) GetProcessMetas() (ps []Meta) {
 	} else {
 		for i, process := range processes {
 			if process != nil {
-				endCpuTimesStats[i], _ = process.Times()
+				endCpuTimesStats[i], err = process.Times()
 				if err != nil {
 					processes[i] = nil
 				}
