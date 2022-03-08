@@ -14,6 +14,7 @@ require (
 	github.com/opencontainers/runc v1.0.3
 	github.com/pkg/browser v0.0.0-20201207095918-0426ae3fba23
 	github.com/pkg/errors v0.9.1
+	github.com/shirou/gopsutil/v3 v3.22.2
 )
 
 replace github.com/gizak/termui => github.com/bcicen/termui v0.0.0-20180326052246-4eb80249d3f5

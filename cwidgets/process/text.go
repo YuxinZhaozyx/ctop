@@ -17,7 +17,7 @@ func (w *MetaCol) SetMeta(m Meta) {
 
 func NewPIDCol() ProcessCol {
 	w := &MetaCol{NewTextCol("PID"), "pid"}
-	w.fWidth = 4
+	w.fWidth = 6
 	return w
 }
 

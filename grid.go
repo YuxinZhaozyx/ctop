@@ -1,6 +1,8 @@
 package main
 
 import (
+	// "time"
+
 	"github.com/bcicen/ctop/config"
 	"github.com/bcicen/ctop/cwidgets/single"
 	"github.com/bcicen/ctop/cwidgets/process"
@@ -139,6 +141,8 @@ func RedrawProcessView(clr bool) {
 }
 
 func ProcessView() MenuFn {
+	header.SetProcessMonitorHint(false)
+
 	ui.Clear()
 	ui.DefaultEvtStream.ResetHandlers()
 	defer ui.DefaultEvtStream.ResetHandlers()
@@ -150,7 +154,9 @@ func ProcessView() MenuFn {
 
 	RedrawProcessView(true)
 
-	HandleKeys("exit", ui.StopLoop)
+	HandleKeysWithEvent("exit", func(ui.Event) {
+		ui.StopLoop()
+	})
 
 	ui.Handle("/sys/kbd/<tab>", func(ui.Event) {
 		ui.StopLoop()
@@ -171,8 +177,14 @@ func ProcessView() MenuFn {
 	})
 
 	ui.Loop()
+	defer ui.Clear()
 
 	header.SetProcessMonitorHint(true)
+
+	go func(){
+		time.Sleep(time.Millisecond * 10)
+		ui.Clear()
+	}()
 
 	return nil
 }
@@ -230,7 +242,6 @@ func Display() bool {
 	ui.Handle("/sys/kbd/<tab>", func(ui.Event) {
 		menu = ProcessView
 		ui.StopLoop()
-		header.SetProcessMonitorHint(false)
 	})
 	ui.Handle("/sys/kbd/l", func(ui.Event) {
 		menu = LogMenu

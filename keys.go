@@ -39,3 +39,9 @@ func HandleKeys(i string, f func()) {
 		ui.Handle(k, func(ui.Event) { f() })
 	}
 }
+
+func HandleKeysWithEvent(i string, f func(ui.Event)) {
+	for _, k := range keyMap[i] {
+		ui.Handle(k, f)
+	}
+}

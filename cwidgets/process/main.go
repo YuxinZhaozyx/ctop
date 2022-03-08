@@ -4,7 +4,11 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"time"
+	"fmt"
 
+	gopsutil_cpu "github.com/shirou/gopsutil/v3/cpu"
+	gopsutil_process "github.com/shirou/gopsutil/v3/process"
 	"github.com/bcicen/ctop/logging"
 
 	ui "github.com/gizak/termui"
@@ -99,6 +103,64 @@ func (pm *ProcessManager) GetProcessMetas() (ps []Meta) {
 			ps = append(ps, processMeta)
 		}
 	}
+
+	// calculate realtime cpu usage
+	numProcess := len(ps)
+	numValidProcess := numProcess
+	interval := time.Second / 2
+	realtimeCpuUsageSuccess := true
+	processes := make([]*gopsutil_process.Process, numProcess)
+	startCpuTimesStats := make([]*gopsutil_cpu.TimesStat, numProcess)
+	endCpuTimesStats := make([]*gopsutil_cpu.TimesStat, numProcess)
+	cpuTimes := make([]float64, numProcess)
+	for i, processMeta := range ps {
+		pid, err := strconv.ParseInt(processMeta["pid"], 10, 32)
+		if err != nil {
+			continue
+		}
+		processes[i], err = gopsutil_process.NewProcess(int32(pid))
+		if err != nil {
+			numValidProcess--;
+		}
+	}
+	if numValidProcess == 0 {
+		realtimeCpuUsageSuccess = false
+	}
+	startTime := time.Now()
+	for i, process := range processes {
+		if process != nil {
+			startCpuTimesStats[i], err = process.Times()
+			if err != nil {
+				processes[i] = nil
+			}
+		}
+	}
+	time.Sleep(interval)
+	duration := time.Since(startTime).Seconds()
+	if duration <= 0 {
+		realtimeCpuUsageSuccess = false
+	} else {
+		for i, process := range processes {
+			if process != nil {
+				endCpuTimesStats[i], _ = process.Times()
+				if err != nil {
+					processes[i] = nil
+				}
+			}
+		}
+		for i := 0; i < numProcess; i++ {
+			if processes[i] != nil {
+				cpuTimes[i] = 100 * (endCpuTimesStats[i].Total() - startCpuTimesStats[i].Total()) / duration
+			}
+		}
+	}
+
+	if realtimeCpuUsageSuccess {
+		for i := 0; i < numProcess; i++ {
+			ps[i]["cpu"] = fmt.Sprintf("%.2f", cpuTimes[i])
+		}
+	}
+
 
 	sort.SliceStable(ps, func(i, j int) bool {
 		i_cpu, err := strconv.ParseFloat(ps[i]["cpu"], 32)
